@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>First React App</title>
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src='https://unpkg.com/babel-standalone@6/babel.min.js'></script>
+</head>
+<body>
+  <div id='app'></div>
+
+  <script>
+    window.API = {
+      fetchItems() {
+        return new Promise((res, rej) => {
+          const items = [
+            {
+              name: 'Buy Groceries',
+              active: true,
+            },
+            {
+              name: 'Do Homework',
+              active: true,
+            },
+            {
+              name: 'Do Laundry',
+              active: true,
+            }
+          ]
+          setTimeout(() => res(items), 2000)
+        })
+      }
+    }
+  </script>
+
+  <script type='text/babel'>
+
+    class Loading extends React.Component {
+
+      constructor(props) {
+        super(props)
+
+        this.state = {
+          text: 'Loading'
+        }
+      }
+
+      componentDidMount() {
+        const stopper = this.state.text + '...'
+
+        this.interval = window.setInterval(() => {
+          this.state.text === stopper
+            ? this.setState({text: 'Loading'})
+            : this.setState((currentState) => {
+            return {
+              text: currentState.text + '.'
+            }
+          })
+        }, 300)
+      }
+
+      componentWillUnmount() {
+        window.clearInterval(this.interval)
+      }
+
+      render() {
+        return <p>{this.state.text}</p>
+      }
+    }
+
+    function ToDo (props) {
+      return (
+        <div>
+          <h2>To Do</h2>
+          <ul>
+            {props.list.map((item) => (
+              <li key={item.name}>
+                <span>{item.name}</span>
+                <button onClick={() => props.onRemoveItem(item.name)}>Complete</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+
+    class App extends React.Component {
+      constructor(props) {
+        super(props)
+        this.state = {
+          items: [],
+          input: '',
+          loading: true
+        }
+        this.handleRemoveItem = this.handleRemoveItem.bind(this)
+        this.updateInput = this.updateInput.bind(this)
+        this.handleAddItem = this.handleAddItem.bind(this)
+        console.log('--constructor--')
+      }
+
+      componentDidMount() {
+        console.log('--componentDidMount--')
+        API.fetchItems()
+          .then((items) => {
+            this.setState({
+              items,
+              loading: false
+            })
+        })
+      }
+
+      componentDidUpdate() {
+        console.log('--componentDidUpdate--')
+      }
+
+      componentWillUnmount() {
+        console.log('--componentWillUnmount--')
+      }
+
+      handleAddItem() {
+        this.setState((currentState) => {
+          return {
+            items: currentState.items.concat([{
+              name: this.state.input,
+              active: true
+            }]),
+            input: ''
+          }
+        })
+      }
+
+      handleRemoveItem(name) {
+        this.setState((currentState) => {
+          return {
+            items: currentState.items.filter((item) => item.name !== name)
+          }
+        })
+      }
+
+      updateInput(e) {
+        const value = e.target.value
+        this.setState({
+          input: value
+        })
+      }
+
+      render() {
+        console.log('--render--')
+
+        if (this.state.loading === true) {
+          return <Loading />
+        }
+        return (
+          <div>
+            <input
+              type='text'
+              placeholder='New Item'
+              value={this.state.input}
+              onChange={this.updateInput}
+            />
+            <button onClick={this.handleAddItem}>
+              Add
+            </button>
+            <div>
+              <button onClick={() => this.setState({
+                items: []
+              })}>Clear All</button>
+            </div>
+            <ToDo
+              list={this.state.items.filter((item) => item.active === true)}
+              onRemoveItem={this.handleRemoveItem}
+            />
+          </div>
+        )
+      }
+    }
+
+    ReactDOM.render(
+      <App />,
+      document.getElementById('app')
+    )
+  </script>
+
+</body>
+</html>
