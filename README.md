@@ -4,7 +4,7 @@ A simple checklist implemented using ReactJS.
 
 Implemented based on the tutorials at https://www.youtube.com/watch?v=8GXXGJRDMdQ
 
-## Skills Learned & Used/To Be Used:
+## Skills Learned & Used:
 
 ReactJS
 - JSX
